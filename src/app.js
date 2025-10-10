@@ -15,6 +15,12 @@ import authRouter from "./routes/auth.routes.js";
 import tasksRouter from "./routes/tasks.routes.js";
 import estudianteRouter from "./routes/estudiante.routes.js";
 import docenteRouter from "./routes/docente.routes.js";
+import cursoRouter from "./routes/curso.routes.js";
+import periodoRouter from "./routes/periodo.routes.js";
+import moduloRouter from "./routes/modulo.routes.js";
+import claseRouter from "./routes/clase.routes.js";
+import notificacionRouter from "./routes/notificacion.routes.js";
+import matriculaRouter from "./routes/matricula.routes.js";
 
 // Configuración para ES modules
 const __filename = fileURLToPath(import.meta.url);
@@ -173,6 +179,12 @@ app.use("/api", authRouter);
 app.use("/api", tasksRouter);
 app.use("/api/estudiantes", estudianteRouter);
 app.use("/api/docentes", docenteRouter);
+app.use("/api/cursos", cursoRouter);
+app.use("/api/periodos", periodoRouter);
+app.use("/api/modulos", moduloRouter);
+app.use("/api/clases", claseRouter);
+app.use("/api/notificaciones", notificacionRouter);
+app.use("/api/matriculas", matriculaRouter);
 
 // Ruta de health check
 app.get('/health', (req, res) => {

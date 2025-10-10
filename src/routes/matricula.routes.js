@@ -1,0 +1,31 @@
+import { Router } from "express";
+import {
+  createMatricula,
+  getMatriculas,
+  getMatriculaById,
+  updateMatricula,
+  deleteMatricula,
+  getMatriculasByEstudiante,
+  agregarPago
+} from "../controllers/matricula.controller.js";
+import { authRequired } from "../middlewares/validateToken.js";
+import { validateSchema } from '../middlewares/validator.middlewares.js';
+import { createMatriculaSchema, updateMatriculaSchema } from "../schemas/matricula.schema.js";
+
+const router = Router();
+
+// Todas las rutas requieren autenticación
+router.use(authRequired);
+
+// CRUD completo
+router.post('/', validateSchema(createMatriculaSchema), createMatricula);
+router.get('/', getMatriculas);
+router.get('/:id', getMatriculaById);
+router.put('/:id', validateSchema(updateMatriculaSchema), updateMatricula);
+router.delete('/:id', deleteMatricula);
+
+// Rutas específicas
+router.get('/estudiante/:estudianteId', getMatriculasByEstudiante);
+router.post('/:id/pago', agregarPago);
+
+export default router;
