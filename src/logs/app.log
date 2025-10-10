@@ -1,0 +1,43 @@
+2025-10-09 16:51:00 [WARN]: 404 - Ruta no encontrada: POST /pagina/crear
+2025-10-09 16:51:01 [INFO]: [0mPOST /pagina/crear [33m404[0m 10.013 ms - 62[0m
+2025-10-09 16:51:46 [INFO]: [0mPOST /api/login [33m400[0m 1.681 ms - 44[0m
+2025-10-09 16:52:53 [INFO]: [0mPOST /api/login [32m200[0m 233.831 ms - 345[0m
+2025-10-09 16:53:27 [INFO]: [0mGET /api/tasks [32m200[0m 291.319 ms - 574[0m
+2025-10-09 17:04:48 [INFO]: [0mGET /api/tasks [31m500[0m 311.989 ms - 50[0m
+2025-10-09 17:05:46 [INFO]: [0mPOST /api/register [32m200[0m 398.340 ms - 345[0m
+2025-10-09 17:09:19 [ERROR]: Error: Expected double-quoted property name in JSON at position 53 (line 5 column 1)
+Stack: SyntaxError: Expected double-quoted property name in JSON at position 53 (line 5 column 1)
+    at JSON.parse (<anonymous>)
+    at parse (/home/leonardo/Escritorio/proyectos/backed-main/node_modules/body-parser/lib/types/json.js:92:19)
+    at /home/leonardo/Escritorio/proyectos/backed-main/node_modules/body-parser/lib/read.js:128:18
+    at AsyncResource.runInAsyncScope (node:async_hooks:214:14)
+    at invokeCallback (/home/leonardo/Escritorio/proyectos/backed-main/node_modules/raw-body/index.js:238:16)
+    at done (/home/leonardo/Escritorio/proyectos/backed-main/node_modules/raw-body/index.js:227:7)
+    at IncomingMessage.onEnd (/home/leonardo/Escritorio/proyectos/backed-main/node_modules/raw-body/index.js:287:7)
+    at IncomingMessage.emit (node:events:519:28)
+    at endReadableNT (node:internal/streams/readable:1698:12)
+    at process.processTicksAndRejections (node:internal/process/task_queues:90:21)
+2025-10-09 17:09:19 [INFO]: [0mPOST /api/login [33m400[0m 12.037 ms - 107[0m
+2025-10-09 17:10:15 [INFO]: [0mPOST /api/login [33m400[0m 145.619 ms - 28[0m
+2025-10-09 17:10:53 [INFO]: [0mPOST /api/login [33m400[0m 1.916 ms - 21[0m
+2025-10-09 17:11:12 [INFO]: [0mPOST /api/login [33m400[0m 0.903 ms - 17[0m
+2025-10-09 17:11:23 [INFO]: [0mPOST /api/login [33m400[0m 136.863 ms - 28[0m
+2025-10-09 17:14:57 [INFO]: [0mPOST /api/login [33m400[0m 154.473 ms - 28[0m
+2025-10-09 17:15:11 [INFO]: [0mPOST /api/login [33m400[0m 136.408 ms - 28[0m
+2025-10-09 17:18:14 [INFO]: [0mPOST /api/register [32m200[0m 396.503 ms - 346[0m
+2025-10-09 17:18:38 [INFO]: [0mPOST /api/login [33m400[0m 146.567 ms - 28[0m
+2025-10-09 17:24:18 [INFO]: [0mPOST /api/register [32m200[0m 428.290 ms - 346[0m
+2025-10-09 17:24:23 [INFO]: [0mPOST /api/login [33m400[0m 158.053 ms - 28[0m
+2025-10-09 17:24:38 [INFO]: [0mPOST /api/login [33m400[0m 141.717 ms - 28[0m
+2025-10-09 17:28:08 [INFO]: [0mPOST /api/login [33m400[0m 180.393 ms - 28[0m
+2025-10-09 17:28:34 [INFO]: [0mPOST /api/register [31m500[0m 239.729 ms - 78[0m
+2025-10-09 17:29:41 [INFO]: [0mPOST /api/register [31m500[0m 249.200 ms - 78[0m
+2025-10-09 17:31:47 [INFO]: [0mPOST /api/register [31m500[0m 239.874 ms - 78[0m
+2025-10-09 17:33:26 [INFO]: [0mPOST /api/register [32m200[0m 397.855 ms - 345[0m
+2025-10-09 17:33:34 [INFO]: [0mPOST /api/login [32m200[0m 223.011 ms - 345[0m
+2025-10-09 17:34:49 [INFO]: [0mGET /api/profile [32m200[0m 144.364 ms - 154[0m
+2025-10-09 17:36:55 [INFO]: [0mPOST /api/tasks [32m201[0m 184.771 ms - 283[0m
+2025-10-09 17:37:00 [INFO]: [0mGET /api/tasks [32m200[0m 296.383 ms - 336[0m
+2025-10-09 17:38:31 [INFO]: [0mGET /api/tasks [32m200[0m 270.520 ms - 336[0m
+2025-10-09 17:38:41 [INFO]: [0mGET /api/tasks [32m200[0m 274.246 ms - 336[0m
+2025-10-09 17:39:56 [INFO]: [0mGET /api/tasks [32m200[0m 328.499 ms - 314[0m
