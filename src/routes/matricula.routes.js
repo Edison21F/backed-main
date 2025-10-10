@@ -6,11 +6,13 @@ import {
   updateMatricula,
   deleteMatricula,
   getMatriculasByEstudiante,
-  agregarPago
+  agregarPago,
+  adminMatricularEstudiante
 } from "../controllers/matricula.controller.js";
 import { authRequired } from "../middlewares/validateToken.js";
 import { validateSchema } from '../middlewares/validator.middlewares.js';
 import { createMatriculaSchema, updateMatriculaSchema } from "../schemas/matricula.schema.js";
+import { uploadComprobante } from '../config/multer.js';
 
 const router = Router();
 
@@ -26,6 +28,9 @@ router.delete('/:id', deleteMatricula);
 
 // Rutas específicas
 router.get('/estudiante/:estudianteId', getMatriculasByEstudiante);
-router.post('/:id/pago', agregarPago);
+router.post('/:id/pago', uploadComprobante, agregarPago);
+
+// Ruta admin para matricular estudiantes
+router.post('/admin/matricular', adminMatricularEstudiante);
 
 export default router;

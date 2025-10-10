@@ -316,7 +316,8 @@ export const updateUserProfile = async (req, res) => {
 
 //crear profesores
 export const createProfesor = async (req, res) => {
-    const { nombres, apellidos, email, cedula, telefono, password, avatar } = req.body;
+    const { nombres, apellidos, email, cedula, telefono, password } = req.body;
+    const avatar = req.file ? `/uploads/avatars/${req.file.filename}` : null;
 
     try {
         // Verificar si el email ya existe
@@ -345,4 +346,41 @@ export const createProfesor = async (req, res) => {
         console.error('Error en createProfesor:', error);
         res.status(500).json({ message: error.message });
     }
+};
+
+// Actualizar avatar del usuario
+export const updateAvatar = async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ message: 'No file uploaded' });
+    }
+
+    const avatarUrl = `/uploads/avatars/${req.file.filename}`;
+
+    const updatedUser = await User.findByIdAndUpdate(
+      req.user.id,
+      { avatar: avatarUrl },
+      { new: true }
+    );
+
+    if (!updatedUser) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    const userData = updatedUser.toJSON();
+
+    res.json({
+      message: 'Avatar updated successfully',
+      user: {
+        id: userData._id,
+        nombres: userData.nombres,
+        apellidos: userData.apellidos,
+        email: userData.email,
+        avatar: userData.avatar
+      }
+    });
+  } catch (error) {
+    console.error('Error updating avatar:', error);
+    res.status(500).json({ message: error.message });
+  }
 };

@@ -3,7 +3,14 @@ import Curso from '../models/curso.model.js';
 // Crear curso
 export const createCurso = async (req, res) => {
   try {
-    const curso = new Curso(req.body);
+    const cursoData = { ...req.body };
+
+    // Si hay archivo de imagen, agregar la URL
+    if (req.file) {
+      cursoData.imagen = `/uploads/cursos/${req.file.filename}`;
+    }
+
+    const curso = new Curso(cursoData);
     const savedCurso = await curso.save();
     res.status(201).json(savedCurso);
   } catch (error) {
@@ -47,15 +54,22 @@ export const getCursoById = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
-
 // Actualizar curso
 export const updateCurso = async (req, res) => {
   try {
+    const updateData = { ...req.body };
+
+    // Si hay archivo de imagen, agregar la URL
+    if (req.file) {
+      updateData.imagen = `/uploads/cursos/${req.file.filename}`;
+    }
+
     const updatedCurso = await Curso.findByIdAndUpdate(
       req.params.id,
-      req.body,
+      updateData,
       { new: true, runValidators: true }
     );
+
     if (!updatedCurso) {
       return res.status(404).json({ message: 'Course not found' });
     }

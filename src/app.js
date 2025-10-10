@@ -21,6 +21,7 @@ import moduloRouter from "./routes/modulo.routes.js";
 import claseRouter from "./routes/clase.routes.js";
 import notificacionRouter from "./routes/notificacion.routes.js";
 import matriculaRouter from "./routes/matricula.routes.js";
+import carritoRouter from "./routes/carrito.routes.js";
 
 // Configuración para ES modules
 const __filename = fileURLToPath(import.meta.url);
@@ -123,6 +124,9 @@ app.use('/api/register', rateLimit({
 
 app.use(limiter);
 
+// ==================== SERVIR ARCHIVOS ESTÁTICOS ====================
+app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
+
 // ==================== MIDDLEWARE BÁSICO ====================
 // Logging con Morgan usando Winston
 const morganFormat = process.env.NODE_ENV === 'production' ? 'combined' : 'dev';
@@ -185,6 +189,7 @@ app.use("/api/modulos", moduloRouter);
 app.use("/api/clases", claseRouter);
 app.use("/api/notificaciones", notificacionRouter);
 app.use("/api/matriculas", matriculaRouter);
+app.use("/api/carrito", carritoRouter);
 
 // Ruta de health check
 app.get('/health', (req, res) => {

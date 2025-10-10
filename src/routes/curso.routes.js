@@ -10,6 +10,7 @@ import {
 import { authRequired } from "../middlewares/validateToken.js";
 import { validateSchema } from '../middlewares/validator.middlewares.js';
 import { createCursoSchema, updateCursoSchema } from "../schemas/curso.schema.js";
+import { uploadImagenCurso } from '../config/multer.js';
 
 const router = Router();
 
@@ -20,10 +21,10 @@ router.get('/activos', getCursosActivos);
 router.use(authRequired);
 
 // CRUD completo para administradores
-router.post('/', validateSchema(createCursoSchema), createCurso);
+router.post('/', uploadImagenCurso, validateSchema(createCursoSchema), createCurso);
 router.get('/', getCursos);
 router.get('/:id', getCursoById);
-router.put('/:id', validateSchema(updateCursoSchema), updateCurso);
+router.put('/:id', uploadImagenCurso, validateSchema(updateCursoSchema), updateCurso);
 router.delete('/:id', deleteCurso);
 
 export default router;

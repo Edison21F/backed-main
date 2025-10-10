@@ -8,6 +8,7 @@ import {
 import { authRequired } from "../middlewares/validateToken.js";
 import { validateSchema } from '../middlewares/validator.middlewares.js';
 import { createEstudianteSchema, updateEstudianteSchema } from "../schemas/estudiante.schema.js";
+import { uploadDocumentos } from '../config/multer.js';
 
 const router = Router();
 
@@ -15,13 +16,13 @@ const router = Router();
 router.use(authRequired);
 
 // Crear perfil de estudiante
-router.post('/profile', validateSchema(createEstudianteSchema), createEstudianteProfile);
+router.post('/profile', uploadDocumentos, validateSchema(createEstudianteSchema), createEstudianteProfile);
 
 // Obtener perfil de estudiante
 router.get('/profile', getEstudianteProfile);
 
 // Actualizar perfil de estudiante
-router.put('/profile', validateSchema(updateEstudianteSchema), updateEstudianteProfile);
+router.put('/profile', uploadDocumentos, validateSchema(updateEstudianteSchema), updateEstudianteProfile);
 
 // Obtener todos los estudiantes (solo administradores)
 router.get('/', getAllEstudiantes);

@@ -28,6 +28,15 @@ export const createEstudianteProfile = async (req, res) => {
       ...req.body
     };
 
+    // Si hay archivos de documentos, procesarlos
+    if (req.files && req.files.documentos) {
+      estudianteData.documentos = req.files.documentos.map(file => ({
+        tipo: req.body.tipos ? req.body.tipos[file.fieldname] || 'documento' : 'documento',
+        url: `/uploads/documentos/${file.filename}`,
+        fechaSubida: new Date()
+      }));
+    }
+
     const newEstudiante = new Estudiante(estudianteData);
     const savedEstudiante = await newEstudiante.save();
 
@@ -83,9 +92,29 @@ export const updateEstudianteProfile = async (req, res) => {
       return res.status(403).json({ message: 'Access denied' });
     }
 
+    const updateData = { ...req.body };
+
+    // Si hay archivos de documentos, procesarlos
+    if (req.files && req.files.documentos) {
+      const nuevosDocumentos = req.files.documentos.map(file => ({
+        tipo: req.body.tipos ? req.body.tipos[file.fieldname] || 'documento' : 'documento',
+        url: `/uploads/documentos/${file.filename}`,
+        fechaSubida: new Date()
+      }));
+
+      // Si ya hay documentos, agregar los nuevos
+      if (updateData.documentos) {
+        updateData.documentos = [...updateData.documentos, ...nuevosDocumentos];
+      } else {
+        // Obtener documentos existentes y agregar nuevos
+        const estudianteActual = await Estudiante.findOne({ usuarioId: userId });
+        updateData.documentos = estudianteActual ? [...(estudianteActual.documentos || []), ...nuevosDocumentos] : nuevosDocumentos;
+      }
+    }
+
     const updatedEstudiante = await Estudiante.findOneAndUpdate(
       { usuarioId: userId },
-      req.body,
+      updateData,
       { new: true, runValidators: true }
     )
     .populate('usuarioId', 'nombres apellidos email')

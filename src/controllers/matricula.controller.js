@@ -120,7 +120,7 @@ export const getMatriculasByEstudiante = async (req, res) => {
 // Agregar pago al historial
 export const agregarPago = async (req, res) => {
   try {
-    const { monto, metodoPago, comprobante } = req.body;
+    const { monto, metodoPago } = req.body;
     const matriculaId = req.params.id;
 
     const matricula = await Matricula.findById(matriculaId);
@@ -128,10 +128,13 @@ export const agregarPago = async (req, res) => {
       return res.status(404).json({ message: 'Enrollment not found' });
     }
 
+    const comprobanteUrl = req.file ? `/uploads/comprobantes/${req.file.filename}` : null;
+
     matricula.historialPagos.push({
+      fecha: new Date(),
       monto,
       metodoPago,
-      comprobante
+      comprobante: comprobanteUrl
     });
 
     matricula.montoPagado += monto;
@@ -141,6 +144,88 @@ export const agregarPago = async (req, res) => {
     res.json({ message: 'Payment added successfully', matricula });
   } catch (error) {
     console.error('Error adding payment:', error);
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// Admin matricula estudiante (solo administradores)
+export const adminMatricularEstudiante = async (req, res) => {
+  try {
+    const adminId = req.user.id;
+    const { estudianteId, periodoId, metodoPago, descuento, observaciones } = req.body;
+
+    // Verificar que el usuario actual es administrador
+    const admin = await User.findById(adminId);
+    if (!admin || admin.rol !== 'administrador') {
+      return res.status(403).json({ message: 'Access denied. Admin required.' });
+    }
+
+    // Verificar que el estudiante existe y es estudiante
+    const estudiante = await User.findById(estudianteId);
+    if (!estudiante || estudiante.rol !== 'estudiante') {
+      return res.status(404).json({ message: 'Student not found' });
+    }
+
+    // Verificar que el periodo existe
+    const periodo = await Periodo.findById(periodoId).populate('cursoId');
+    if (!periodo) {
+      return res.status(404).json({ message: 'Period not found' });
+    }
+
+    if (periodo.estado !== 'en_curso') {
+      return res.status(400).json({ message: 'Period is not available for enrollment' });
+    }
+
+    if (periodo.cuposDisponibles <= 0) {
+      return res.status(400).json({ message: 'No available spots for this period' });
+    }
+
+    // Verificar que no esté ya matriculado
+    const existingMatricula = await Matricula.findOne({
+      estudianteId: estudianteId,
+      periodoId: periodoId
+    });
+
+    if (existingMatricula) {
+      return res.status(400).json({ message: 'Student is already enrolled in this period' });
+    }
+
+    // Calcular precios con descuento
+    const precioOriginal = periodo.cursoId.precio;
+    const descuentoAplicado = descuento || 0;
+    const precioFinal = precioOriginal * (1 - descuentoAplicado / 100);
+
+    // Crear matricula
+    const matricula = new Matricula({
+      estudianteId: estudianteId,
+      periodoId: periodoId,
+      cursoId: periodo.cursoId._id,
+      metodoPago: metodoPago || 'efectivo',
+      montoPagado: precioFinal,
+      montoPendiente: 0,
+      descuento: descuentoAplicado,
+      observaciones: observaciones || 'Matriculado por administrador'
+    });
+
+    const savedMatricula = await matricula.save();
+
+    // Actualizar cupos del periodo
+    await Periodo.findByIdAndUpdate(
+      periodoId,
+      { $inc: { cuposOcupados: 1, cuposDisponibles: -1 } }
+    );
+
+    // Poblar datos para respuesta
+    await savedMatricula.populate('estudianteId', 'nombres apellidos email');
+    await savedMatricula.populate('periodoId', 'nombre codigo');
+    await savedMatricula.populate('cursoId', 'nombre codigo');
+
+    res.status(201).json({
+      message: 'Student enrolled successfully by admin',
+      matricula: savedMatricula
+    });
+  } catch (error) {
+    console.error('Error enrolling student by admin:', error);
     res.status(500).json({ message: error.message });
   }
 };

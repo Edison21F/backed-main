@@ -1,1 +1,8 @@
-/client
+node_modules
+
+
+logs
+
+*.log
+
+uploads
