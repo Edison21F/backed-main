@@ -39,29 +39,29 @@ export const register = async (req, res) => {
         const userSaved = await newUser.save();
         // Si el rol es estudiante, crear perfil de estudiante básico
         if (userSaved.rol === 'estudiante') {
-          try {
-            const estudiante = new Estudiante({
-              usuarioId: userSaved._id
-            });
-            await estudiante.save();
-            console.log('Perfil de estudiante creado automáticamente');
-          } catch (error) {
-            console.error('Error creando perfil de estudiante:', error);
-            // No fallar el registro por esto
-          }
+            try {
+                const estudiante = new Estudiante({
+                    usuarioId: userSaved._id
+                });
+                await estudiante.save();
+                console.log('Perfil de estudiante creado automáticamente');
+            } catch (error) {
+                console.error('Error creando perfil de estudiante:', error);
+                // No fallar el registro por esto
+            }
         }
         // Si el rol es docente, crear perfil de docente básico
         if (userSaved.rol === 'docente') {
-          try {
-            const docente = new Docente({
-              usuarioId: userSaved._id
-            });
-            await docente.save();
-            console.log('Perfil de docente creado automáticamente');
-          } catch (error) {
-            console.error('Error creando perfil de docente:', error);
-            // No fallar el registro por esto
-          }
+            try {
+                const docente = new Docente({
+                    usuarioId: userSaved._id
+                });
+                await docente.save();
+                console.log('Perfil de docente creado automáticamente');
+            } catch (error) {
+                console.error('Error creando perfil de docente:', error);
+                // No fallar el registro por esto
+            }
         }
 
         // Crear token
@@ -350,37 +350,49 @@ export const createProfesor = async (req, res) => {
 
 // Actualizar avatar del usuario
 export const updateAvatar = async (req, res) => {
-  try {
-    if (!req.file) {
-      return res.status(400).json({ message: 'No file uploaded' });
+    try {
+        if (!req.file) {
+            return res.status(400).json({ message: 'No file uploaded' });
+        }
+
+        const avatarUrl = `/uploads/avatars/${req.file.filename}`;
+
+        const updatedUser = await User.findByIdAndUpdate(
+            req.user.id,
+            { avatar: avatarUrl },
+            { new: true }
+        );
+
+        if (!updatedUser) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        const userData = updatedUser.toJSON();
+
+        res.json({
+            message: 'Avatar updated successfully',
+            user: {
+                id: userData._id,
+                nombres: userData.nombres,
+                apellidos: userData.apellidos,
+                email: userData.email,
+                avatar: userData.avatar
+            }
+        });
+    } catch (error) {
+        console.error('Error updating avatar:', error);
+        res.status(500).json({ message: error.message });
     }
+};
 
-    const avatarUrl = `/uploads/avatars/${req.file.filename}`;
+//traer solo los profesores
+export const getProfesores = async (req, res) => {
+    try {
+        const profesores = await User.find({ rol: 'docente' }).select('-password');
 
-    const updatedUser = await User.findByIdAndUpdate(
-      req.user.id,
-      { avatar: avatarUrl },
-      { new: true }
-    );
-
-    if (!updatedUser) {
-      return res.status(404).json({ message: 'User not found' });
+        res.json(profesores);
+    } catch (error) {
+        console.error('Error en getProfesores:', error);
+        res.status(500).json({ message: error.message });
     }
-
-    const userData = updatedUser.toJSON();
-
-    res.json({
-      message: 'Avatar updated successfully',
-      user: {
-        id: userData._id,
-        nombres: userData.nombres,
-        apellidos: userData.apellidos,
-        email: userData.email,
-        avatar: userData.avatar
-      }
-    });
-  } catch (error) {
-    console.error('Error updating avatar:', error);
-    res.status(500).json({ message: error.message });
-  }
 };

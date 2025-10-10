@@ -49,3 +49,6 @@ Stack: SyntaxError: Expected double-quoted property name in JSON at position 53 
 2025-10-09 21:33:13 [INFO]: [0mPOST /api/estudiantes/profile [33m400[0m 2.743 ms - 20[0m
 2025-10-09 21:34:47 [INFO]: [0mPOST /api/estudiantes/profile [32m201[0m 451.712 ms - 540[0m
 2025-10-09 21:35:43 [INFO]: [0mGET /api/estudiantes/profile [31m500[0m 302.089 ms - 98[0m
+2025-10-10 12:50:15 [INFO]: [0mPOST /api/login [32m200[0m 425.228 ms - 505[0m
+2025-10-10 12:50:35 [INFO]: [0mPOST /api/cursos [32m201[0m 171.387 ms - 740[0m
+2025-10-10 13:05:51 [INFO]: [0mGET /api/profesores [32m200[0m 158.706 ms - 282[0m
