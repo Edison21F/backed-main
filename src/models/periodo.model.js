@@ -63,7 +63,6 @@ const periodoSchema = new mongoose.Schema({
 });
 
 // Índices
-periodoSchema.index({ codigo: 1 }, { unique: true });
 periodoSchema.index({ cursoId: 1 });
 periodoSchema.index({ estado: 1 });
 periodoSchema.index({ fechaInicio: 1, fechaFin: 1 });

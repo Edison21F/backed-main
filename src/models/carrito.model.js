@@ -51,7 +51,6 @@ const carritoSchema = new mongoose.Schema({
 });
 
 // Índices
-carritoSchema.index({ usuarioId: 1 }, { unique: true });
 carritoSchema.index({ estado: 1 });
 
 // Middleware para calcular total automáticamente

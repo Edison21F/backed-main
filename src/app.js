@@ -180,7 +180,6 @@ app.use((req, res, next) => {
 
 // ==================== RUTAS ====================
 app.use("/api", authRouter);
-app.use("/api", tasksRouter);
 app.use("/api/estudiantes", estudianteRouter);
 app.use("/api/docentes", docenteRouter);
 app.use("/api/cursos", cursoRouter);

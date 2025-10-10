@@ -22,12 +22,13 @@ router.use(authRequired);
 // CRUD completo
 router.post('/', validateSchema(createMatriculaSchema), createMatricula);
 router.get('/', getMatriculas);
+
+// Rutas específicas
+router.get('/estudiante', getMatriculasByEstudiante);
+
 router.get('/:id', getMatriculaById);
 router.put('/:id', validateSchema(updateMatriculaSchema), updateMatricula);
 router.delete('/:id', deleteMatricula);
-
-// Rutas específicas
-router.get('/estudiante/:estudianteId', getMatriculasByEstudiante);
 router.post('/:id/pago', uploadComprobante, agregarPago);
 
 // Ruta admin para matricular estudiantes

@@ -63,7 +63,6 @@ const cursoSchema = new mongoose.Schema({
 });
 
 // Índices
-cursoSchema.index({ codigo: 1 }, { unique: true });
 cursoSchema.index({ nivel: 1 });
 cursoSchema.index({ activo: 1 });
 

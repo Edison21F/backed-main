@@ -52,3 +52,14 @@ Stack: SyntaxError: Expected double-quoted property name in JSON at position 53 
 2025-10-10 12:50:15 [INFO]: [0mPOST /api/login [32m200[0m 425.228 ms - 505[0m
 2025-10-10 12:50:35 [INFO]: [0mPOST /api/cursos [32m201[0m 171.387 ms - 740[0m
 2025-10-10 13:05:51 [INFO]: [0mGET /api/profesores [32m200[0m 158.706 ms - 282[0m
+2025-10-10 14:27:02 [INFO]: [0mGET /api/carrito [33m403[0m 162.719 ms - 43[0m
+2025-10-10 15:01:26 [INFO]: [0mPOST /api/login [32m200[0m 391.912 ms - 455[0m
+2025-10-10 15:01:39 [INFO]: [0mGET /api/matriculas/estudiante [31m500[0m 6.124 ms - 116[0m
+2025-10-10 15:03:41 [INFO]: [0mGET /api/matriculas/estudiante [32m200[0m 323.958 ms - 640[0m
+2025-10-10 15:14:34 [INFO]: [0mPOST /api/login [32m200[0m 417.184 ms - 505[0m
+2025-10-10 15:18:54 [INFO]: [0mPUT /api/cursos/68e9476b8f50fe8b0a986f14 [32m200[0m 167.808 ms - 740[0m
+2025-10-10 15:19:31 [INFO]: [0mPUT /api/cursos/68e9476b8f50fe8b0a986f14 [32m200[0m 174.396 ms - 806[0m
+2025-10-10 15:20:40 [WARN]: 404 - Ruta no encontrada: GET //uploads/cursos/miles-morales-en-spider-man-un-nuevo-universo_3840x2160_xtrafondos.com-1760127571177-711377592.jpg
+2025-10-10 15:20:40 [INFO]: [0mGET //uploads/cursos/miles-morales-en-spider-man-un-nuevo-universo_3840x2160_xtrafondos.com-1760127571177-711377592.jpg [33m404[0m 0.814 ms - 62[0m
+2025-10-10 15:20:40 [WARN]: 404 - Ruta no encontrada: GET /favicon.ico
+2025-10-10 15:20:40 [INFO]: [0mGET /favicon.ico [33m404[0m 0.858 ms - 62[0m

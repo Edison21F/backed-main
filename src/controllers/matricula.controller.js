@@ -106,7 +106,9 @@ export const deleteMatricula = async (req, res) => {
 // Obtener matriculas de un estudiante
 export const getMatriculasByEstudiante = async (req, res) => {
   try {
-    const matriculas = await Matricula.find({ estudianteId: req.params.estudianteId })
+    //funcion traer id del usuario logueado
+    const userId = req.user.id;
+    const matriculas = await Matricula.find({ estudianteId: userId })
       .populate('periodoId', 'nombre codigo fechaInicio fechaFin')
       .populate('cursoId', 'nombre codigo precio')
       .sort({ fechaMatricula: -1 });
