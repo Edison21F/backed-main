@@ -41,3 +41,11 @@ Stack: SyntaxError: Expected double-quoted property name in JSON at position 53 
 2025-10-09 17:38:31 [INFO]: [0mGET /api/tasks [32m200[0m 270.520 ms - 336[0m
 2025-10-09 17:38:41 [INFO]: [0mGET /api/tasks [32m200[0m 274.246 ms - 336[0m
 2025-10-09 17:39:56 [INFO]: [0mGET /api/tasks [32m200[0m 328.499 ms - 314[0m
+2025-10-09 21:16:29 [INFO]: [0mGET /api/tasks [32m200[0m 319.019 ms - 354[0m
+2025-10-09 21:16:38 [INFO]: [0mGET /api/profile [32m200[0m 141.779 ms - 226[0m
+2025-10-09 21:19:46 [INFO]: [0mPUT /api/profile [32m200[0m 164.333 ms - 290[0m
+2025-10-09 21:19:51 [INFO]: [0mGET /api/profile [32m200[0m 146.879 ms - 290[0m
+2025-10-09 21:30:33 [INFO]: [0mGET /api/estudiantes/profile [33m404[0m 294.497 ms - 39[0m
+2025-10-09 21:33:13 [INFO]: [0mPOST /api/estudiantes/profile [33m400[0m 2.743 ms - 20[0m
+2025-10-09 21:34:47 [INFO]: [0mPOST /api/estudiantes/profile [32m201[0m 451.712 ms - 540[0m
+2025-10-09 21:35:43 [INFO]: [0mGET /api/estudiantes/profile [31m500[0m 302.089 ms - 98[0m

@@ -1,46 +1,70 @@
 import mongoose from "mongoose";
-import { cifrarDatos, descifrarDatos } from '../libs/encrypDates.js';
+import bcrypt from 'bcryptjs';
 
 const userSchema = new mongoose.Schema({
-    username: { 
-        type: String, 
-        required: true, 
-        trim: true 
-    },
-    email: { 
-        type: String, 
-        required: true, 
+    nombres: {
+        type: String,
+        required: true,
         trim: true
     },
-    emailHash: {
+    apellidos: {
+        type: String,
+        required: true,
+        trim: true
+    },
+    email: {
         type: String,
         required: true,
         unique: true,
-        index: true
+        trim: true,
+        lowercase: true
     },
-    password: { 
-        type: String, 
-        required: true 
+    cedula: {
+        type: String,
+        required: true,
+        unique: true,
+        trim: true
+    },
+    telefono: {
+        type: String,
+        trim: true
+    },
+    password: {
+        type: String,
+        required: true
+    },
+    rol: {
+        type: String,
+        enum: ['estudiante', 'docente', 'administrador'],
+        default: 'estudiante'
+    },
+    avatar: {
+        type: String,
+        trim: true
+    },
+    activo: {
+        type: Boolean,
+        default: true
+    },
+    fechaRegistro: {
+        type: Date,
+        default: Date.now
+    },
+    ultimoAcceso: {
+        type: Date,
+        default: Date.now
     }
-}, {
-    timestamps: true
 });
 
-// Encriptar datos antes de guardar
+// Hashear contraseña antes de guardar
 userSchema.pre('save', async function(next) {
     try {
-        // Cifrar username si fue modificado o es nuevo y NO está ya cifrado
-        if ((this.isModified('username') || this.isNew) && !this.username.includes('U2FsdGVk')) {
-            this.username = cifrarDatos(this.username);
+        // Hashear password si fue modificado o es nuevo
+        if (this.isModified('password') || this.isNew) {
+            const salt = await bcrypt.genSalt(10);
+            this.password = await bcrypt.hash(this.password, salt);
         }
-        
-        // Cifrar email si fue modificado o es nuevo y NO está ya cifrado
-        if ((this.isModified('email') || this.isNew) && !this.email.includes('U2FsdGVk')) {
-            this.email = cifrarDatos(this.email);
-        }
-        
-        // NO cifrar el password - bcrypt ya lo protege
-        
+
         next();
     } catch (error) {
         console.error('Error en pre-save hook:', error);
@@ -48,29 +72,18 @@ userSchema.pre('save', async function(next) {
     }
 });
 
-// Descifrar datos al convertir a JSON
+// Método para comparar contraseña
+userSchema.methods.comparePassword = async function(candidatePassword) {
+    return await bcrypt.compare(candidatePassword, this.password);
+};
+
+// Método para convertir a JSON sin campos sensibles
 userSchema.methods.toJSON = function() {
     const user = this.toObject();
-    
-    try {
-        // Descifrar username
-        if (user.username) {
-            user.username = descifrarDatos(user.username);
-        }
-        
-        // Descifrar email
-        if (user.email) {
-            user.email = descifrarDatos(user.email);
-        }
-        
-        // Eliminar campos sensibles
-        delete user.password;
-        delete user.emailHash;
-        
-    } catch (error) {
-        console.error('Error al descifrar datos del usuario:', error);
-    }
-    
+
+    // Eliminar campos sensibles
+    delete user.password;
+
     return user;
 };
 

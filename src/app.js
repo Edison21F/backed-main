@@ -13,6 +13,8 @@ import winston from "winston";
 
 import authRouter from "./routes/auth.routes.js";
 import tasksRouter from "./routes/tasks.routes.js";
+import estudianteRouter from "./routes/estudiante.routes.js";
+import docenteRouter from "./routes/docente.routes.js";
 
 // Configuración para ES modules
 const __filename = fileURLToPath(import.meta.url);
@@ -169,6 +171,8 @@ app.use((req, res, next) => {
 // ==================== RUTAS ====================
 app.use("/api", authRouter);
 app.use("/api", tasksRouter);
+app.use("/api/estudiantes", estudianteRouter);
+app.use("/api/docentes", docenteRouter);
 
 // Ruta de health check
 app.get('/health', (req, res) => {
