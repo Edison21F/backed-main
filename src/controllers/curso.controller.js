@@ -1,3 +1,4 @@
+import mongoose from 'mongoose';
 import Curso from '../models/curso.model.js';
 
 // Crear curso
@@ -44,6 +45,9 @@ export const getCursos = async (req, res) => {
 // Obtener curso por ID
 export const getCursoById = async (req, res) => {
   try {
+    if (!req.params.id || !mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({ message: 'Invalid course ID' });
+    }
     const curso = await Curso.findById(req.params.id);
     if (!curso) {
       return res.status(404).json({ message: 'Course not found' });
@@ -57,6 +61,9 @@ export const getCursoById = async (req, res) => {
 // Actualizar curso
 export const updateCurso = async (req, res) => {
   try {
+    if (!req.params.id || !mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({ message: 'Invalid course ID' });
+    }
     const updateData = { ...req.body };
 
     // Si hay archivo de imagen, agregar la URL
@@ -83,6 +90,9 @@ export const updateCurso = async (req, res) => {
 // Eliminar curso (soft delete)
 export const deleteCurso = async (req, res) => {
   try {
+    if (!req.params.id || !mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({ message: 'Invalid course ID' });
+    }
     const updatedCurso = await Curso.findByIdAndUpdate(
       req.params.id,
       { activo: false },
@@ -107,6 +117,24 @@ export const getCursosActivos = async (req, res) => {
     res.json(cursos);
   } catch (error) {
     console.error('Error getting active courses:', error);
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// cursos por estudiante
+export const getCursosPorEstudiante = async (req, res) => {
+  try {
+    const estudianteId = req.params.id;
+    if (!estudianteId || !mongoose.Types.ObjectId.isValid(estudianteId)) {
+      return res.status(400).json({ message: 'Invalid student ID' });
+    }
+
+    const cursos = await Curso.find({ estudiantes: estudianteId })
+      .select('nombre codigo descripcion nivel precio duracionSemanas cupoMaximo imagen')
+      .sort({ nombre: 1 });
+    res.json(cursos);
+  } catch (error) {
+    console.error('Error getting courses by student:', error);
     res.status(500).json({ message: error.message });
   }
 };

@@ -12,7 +12,6 @@ import { fileURLToPath } from "url";
 import winston from "winston";
 
 import authRouter from "./routes/auth.routes.js";
-import tasksRouter from "./routes/tasks.routes.js";
 import estudianteRouter from "./routes/estudiante.routes.js";
 import docenteRouter from "./routes/docente.routes.js";
 import cursoRouter from "./routes/curso.routes.js";
@@ -62,11 +61,14 @@ const logger = winston.createLogger({
 
 // ==================== CONFIGURACIÓN DE CORS ====================
 const allowedOrigins = [
-  "http://localhost:5173",
-  "https://home-task-vite.vercel.app",
-  "http://localhost:19006",
-  "http://localhost:8081",  
-  "exp://192.168.100.32:8081",
+  "http://localhost:3000",
+  "http://localhost:3001",
+  "http://localhost:5173", // Vite default
+  "http://localhost:8080", // Common dev port
+  "http://127.0.0.1:3000",
+  "http://127.0.0.1:3001",
+  "http://127.0.0.1:5173",
+  "http://127.0.0.1:8080"
 ];
 
 app.use(cors({
@@ -81,7 +83,7 @@ app.use(cors({
   },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'Cookie'],
 }));
 
 // ==================== SEGURIDAD ====================
@@ -112,7 +114,7 @@ const limiter = rateLimit({
 // Aplicar rate limiting a rutas de autenticación
 app.use('/api/login', rateLimit({
     windowMs: 15 * 60 * 1000,
-    max: 5, // solo 5 intentos de login cada 15 minutos
+    max: 10, // solo 5 intentos de login cada 15 minutos
     message: { error: 'Demasiados intentos de inicio de sesión.' }
 }));
 

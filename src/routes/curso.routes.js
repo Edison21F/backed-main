@@ -5,7 +5,8 @@ import {
   getCursoById,
   updateCurso,
   deleteCurso,
-  getCursosActivos
+  getCursosActivos,
+  getCursosPorEstudiante
 } from "../controllers/curso.controller.js";
 import { authRequired } from "../middlewares/validateToken.js";
 import { validateSchema } from '../middlewares/validator.middlewares.js';
@@ -21,10 +22,15 @@ router.get('/activos', getCursosActivos);
 router.use(authRequired);
 
 // CRUD completo para administradores
+
 router.post('/', uploadImagenCurso, validateSchema(createCursoSchema), createCurso);
 router.get('/', getCursos);
 router.get('/:id', getCursoById);
 router.put('/:id', uploadImagenCurso, validateSchema(updateCursoSchema), updateCurso);
 router.delete('/:id', deleteCurso);
+
+// Cursos por estudiante
+router.get('/estudiante/:id', getCursosPorEstudiante);
+
 
 export default router;

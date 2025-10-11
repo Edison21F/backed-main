@@ -79,7 +79,7 @@ export const register = async (req, res) => {
 
         res.json({
             token,
-            user: {
+            usuario: {
                 id: userData._id,
                 nombres: userData.nombres,
                 apellidos: userData.apellidos,
@@ -142,7 +142,7 @@ export const login = async (req, res) => {
 
         res.json({
             token,
-            user: {
+            usuario: {
                 id: userData._id,
                 nombres: userData.nombres,
                 apellidos: userData.apellidos,
