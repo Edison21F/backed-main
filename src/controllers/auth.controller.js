@@ -1,10 +1,27 @@
 import User from '../models/user.model.js';
 import Estudiante from '../models/estudiante.model.js';
 import Docente from '../models/docente.model.js';
+import Matricula from '../models/matricula.model.js';
 import bcrypt from 'bcryptjs';
 import { createAccessToken } from '../libs/jwt.js';
 import jwt from 'jsonwebtoken';
 import { TOKEN_SECRET } from '../config.js';
+
+const normalizeRole = (rol = '') => (rol === 'administrador' ? 'admin' : rol);
+
+const buildUserResponse = (userData) => ({
+    id: userData._id,
+    nombres: userData.nombres,
+    apellidos: userData.apellidos,
+    email: userData.email,
+    cedula: userData.cedula,
+    telefono: userData.telefono,
+    rol: normalizeRole(userData.rol),
+    avatar: userData.avatar,
+    activo: userData.activo,
+    fechaRegistro: userData.fechaRegistro,
+    ultimoAcceso: userData.ultimoAcceso,
+});
 
 
 export const register = async (req, res) => {
@@ -79,19 +96,7 @@ export const register = async (req, res) => {
 
         res.json({
             token,
-            usuario: {
-                id: userData._id,
-                nombres: userData.nombres,
-                apellidos: userData.apellidos,
-                email: userData.email,
-                cedula: userData.cedula,
-                telefono: userData.telefono,
-                rol: userData.rol,
-                avatar: userData.avatar,
-                activo: userData.activo,
-                fechaRegistro: userData.fechaRegistro,
-                ultimoAcceso: userData.ultimoAcceso,
-            },
+            usuario: buildUserResponse(userData),
         });
 
     } catch (error) {
@@ -142,19 +147,7 @@ export const login = async (req, res) => {
 
         res.json({
             token,
-            usuario: {
-                id: userData._id,
-                nombres: userData.nombres,
-                apellidos: userData.apellidos,
-                email: userData.email,
-                cedula: userData.cedula,
-                telefono: userData.telefono,
-                rol: userData.rol,
-                avatar: userData.avatar,
-                activo: userData.activo,
-                fechaRegistro: userData.fechaRegistro,
-                ultimoAcceso: userData.ultimoAcceso,
-            },
+            usuario: buildUserResponse(userData),
         });
 
     } catch (error) {
@@ -181,20 +174,34 @@ export const profile = async (req, res) => {
         }
 
         const userData = userFound.toJSON();
+        const response = buildUserResponse(userData);
 
-        return res.json({
-            id: userData._id,
-            nombres: userData.nombres,
-            apellidos: userData.apellidos,
-            email: userData.email,
-            cedula: userData.cedula,
-            telefono: userData.telefono,
-            rol: userData.rol,
-            avatar: userData.avatar,
-            activo: userData.activo,
-            fechaRegistro: userData.fechaRegistro,
-            ultimoAcceso: userData.ultimoAcceso,
-        });
+        if (userFound.rol === 'estudiante') {
+            const matricula = await Matricula.findOne({
+                estudianteId: userFound._id,
+                estado: { $in: ['activa', 'pagada'] }
+            }).sort({ createdAt: -1 });
+
+            if (matricula) {
+                response.cursoActual = matricula.cursoId;
+                response.estado = 'activo';
+            } else {
+                response.estado = 'inactivo';
+            }
+
+            const completados = await Matricula.find({
+                estudianteId: userFound._id,
+                estado: 'completada'
+            });
+
+            response.historialCursos = completados.map(m => ({
+                cursoId: m.cursoId,
+                estado: 'completado',
+                fechaFin: m.updatedAt
+            }));
+        }
+
+        return res.json(response);
     } catch (error) {
         console.error('Error en profile:', error);
         res.status(500).json({ message: error.message });
@@ -219,19 +226,7 @@ export const verifyToken = async (req, res) => {
 
         const userData = userFound.toJSON();
 
-        return res.json({
-            id: userData._id,
-            nombres: userData.nombres,
-            apellidos: userData.apellidos,
-            email: userData.email,
-            cedula: userData.cedula,
-            telefono: userData.telefono,
-            rol: userData.rol,
-            avatar: userData.avatar,
-            activo: userData.activo,
-            fechaRegistro: userData.fechaRegistro,
-            ultimoAcceso: userData.ultimoAcceso,
-        });
+        return res.json(buildUserResponse(userData));
 
     } catch (error) {
         console.error('Error en verifyToken:', error);
@@ -250,19 +245,7 @@ export const getUserProfile = async (req, res) => {
 
         const userData = user.toJSON();
 
-        res.json({
-            id: userData._id,
-            nombres: userData.nombres,
-            apellidos: userData.apellidos,
-            email: userData.email,
-            cedula: userData.cedula,
-            telefono: userData.telefono,
-            rol: userData.rol,
-            avatar: userData.avatar,
-            activo: userData.activo,
-            fechaRegistro: userData.fechaRegistro,
-            ultimoAcceso: userData.ultimoAcceso,
-        });
+        res.json(buildUserResponse(userData));
     } catch (error) {
         console.error('Error en getUserProfile:', error);
         res.status(500).json({ message: error.message });
@@ -295,19 +278,7 @@ export const updateUserProfile = async (req, res) => {
 
         const userData = updatedUser.toJSON();
 
-        res.json({
-            id: userData._id,
-            nombres: userData.nombres,
-            apellidos: userData.apellidos,
-            email: userData.email,
-            cedula: userData.cedula,
-            telefono: userData.telefono,
-            rol: userData.rol,
-            avatar: userData.avatar,
-            activo: userData.activo,
-            fechaRegistro: userData.fechaRegistro,
-            ultimoAcceso: userData.ultimoAcceso,
-        });
+        res.json(buildUserResponse(userData));
     } catch (error) {
         console.error('Error en updateUserProfile:', error);
         res.status(500).json({ message: error.message });
@@ -393,6 +364,81 @@ export const getProfesores = async (req, res) => {
         res.json(profesores);
     } catch (error) {
         console.error('Error en getProfesores:', error);
+        res.status(500).json({ message: error.message });
+    }
+};
+
+// ADMIN: listar usuarios con filtro opcional por rol
+export const getUsuarios = async (req, res) => {
+    try {
+        const { rol } = req.query;
+        const filter = {};
+        if (rol) filter.rol = rol;
+        const usuarios = await User.find(filter).select('-password');
+        res.json(usuarios);
+    } catch (error) {
+        console.error('Error en getUsuarios:', error);
+        res.status(500).json({ message: error.message });
+    }
+};
+
+// ADMIN: crear usuario (docente/estudiante/administrador) sin alterar sesión
+export const adminCreateUser = async (req, res) => {
+    const { nombres, apellidos, email, cedula, telefono, password, rol } = req.body;
+    const avatar = req.file ? `/uploads/avatars/${req.file.filename}` : undefined;
+    try {
+        const existingEmail = await User.findOne({ email });
+        if (existingEmail) return res.status(400).json({ message: 'Email already exists' });
+        const existingCedula = await User.findOne({ cedula });
+        if (existingCedula) return res.status(400).json({ message: 'Cedula already exists' });
+
+        const newUser = new User({ nombres, apellidos, email, cedula, telefono, password, rol: rol || 'estudiante', avatar });
+        const saved = await newUser.save();
+
+        // crear perfiles básicos según rol
+        if (saved.rol === 'estudiante') {
+            try { await new Estudiante({ usuarioId: saved._id }).save(); } catch (e) { console.error('Perfil estudiante auto:', e); }
+        }
+        if (saved.rol === 'docente') {
+            try { await new Docente({ usuarioId: saved._id }).save(); } catch (e) { console.error('Perfil docente auto:', e); }
+        }
+
+        const data = saved.toJSON();
+        return res.status(201).json({ user: data });
+    } catch (error) {
+        console.error('Error en adminCreateUser:', error);
+        res.status(500).json({ message: error.message });
+    }
+};
+
+// ADMIN: actualizar usuario por id
+export const updateUserByAdmin = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { nombres, apellidos, email, cedula, telefono, password, rol, activo, avatar } = req.body;
+        const updateData = { nombres, apellidos, email, cedula, telefono, rol, activo, avatar };
+        if (password) {
+            const salt = await bcrypt.genSalt(10);
+            updateData.password = await bcrypt.hash(password, salt);
+        }
+        const updated = await User.findByIdAndUpdate(id, updateData, { new: true });
+        if (!updated) return res.status(404).json({ message: 'User not found' });
+        return res.json(updated.toJSON());
+    } catch (error) {
+        console.error('Error en updateUserByAdmin:', error);
+        res.status(500).json({ message: error.message });
+    }
+};
+
+// ADMIN: eliminar (desactivar) usuario
+export const deleteUserByAdmin = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const updated = await User.findByIdAndUpdate(id, { activo: false }, { new: true });
+        if (!updated) return res.status(404).json({ message: 'User not found' });
+        return res.json({ message: 'User deactivated' });
+    } catch (error) {
+        console.error('Error en deleteUserByAdmin:', error);
         res.status(500).json({ message: error.message });
     }
 };

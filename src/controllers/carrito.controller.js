@@ -2,6 +2,7 @@ import Carrito from '../models/carrito.model.js';
 import Matricula from '../models/matricula.model.js';
 import Periodo from '../models/periodo.model.js';
 import User from '../models/user.model.js';
+import { matricularEstudiante } from '../services/matricula.service.js';
 
 // Obtener carrito del usuario
 export const getCarrito = async (req, res) => {
@@ -15,16 +16,16 @@ export const getCarrito = async (req, res) => {
     }
 
     let carrito = await Carrito.findOne({ usuarioId: userId })
-      .populate('items.cursoId', 'nombre codigo precio imagen')
-      .populate('items.periodoId', 'nombre codigo fechaInicio fechaFin');
+      .populate('items.cursoId', 'nombre codigo precio imagen nivel')
+      .populate('items.periodoId', 'nombre codigo fechaInicio fechaFin horario');
 
     if (!carrito) {
       // Crear carrito vacío si no existe
       carrito = new Carrito({ usuarioId: userId });
       await carrito.save();
       carrito = await Carrito.findById(carrito._id)
-        .populate('items.cursoId', 'nombre codigo precio imagen')
-        .populate('items.periodoId', 'nombre codigo fechaInicio fechaFin');
+        .populate('items.cursoId', 'nombre codigo precio imagen nivel')
+        .populate('items.periodoId', 'nombre codigo fechaInicio fechaFin horario');
     }
 
     res.json(carrito);
@@ -52,7 +53,7 @@ export const addToCarrito = async (req, res) => {
       return res.status(404).json({ message: 'Period not found' });
     }
 
-    if (periodo.estado !== 'en_curso') {
+    if (periodo.estado !== 'en_curso' && periodo.estado !== 'planificado') {
       return res.status(400).json({ message: 'Period is not available for enrollment' });
     }
 
@@ -173,36 +174,25 @@ export const checkoutCarrito = async (req, res) => {
     // Crear matriculas para cada item
     const matriculasCreadas = [];
     for (const item of carrito.items) {
-      // Verificar cupos disponibles
-      if (item.periodoId.cuposDisponibles <= 0) {
-        return res.status(400).json({
-          message: `No available spots for period ${item.periodoId.nombre}`
+      try {
+        const matricula = await matricularEstudiante({
+          estudianteId: userId,
+          periodoId: item.periodoId._id,
+          cursoId: item.cursoId._id,
+          metodoPago,
+          montoPagado: item.precio
         });
+        matriculasCreadas.push(matricula);
+      } catch (error) {
+        console.error('Error during checkout:', error);
+        throw error;
       }
-
-      // Crear matricula
-      const matricula = new Matricula({
-        estudianteId: userId,
-        periodoId: item.periodoId._id,
-        cursoId: item.cursoId._id,
-        metodoPago,
-        montoPagado: item.precio,
-        montoPendiente: 0
-      });
-
-      const savedMatricula = await matricula.save();
-
-      // Actualizar cupos del periodo
-      await Periodo.findByIdAndUpdate(
-        item.periodoId._id,
-        { $inc: { cuposOcupados: 1, cuposDisponibles: -1 } }
-      );
-
-      matriculasCreadas.push(savedMatricula);
     }
 
-    // Marcar carrito como procesado
-    carrito.estado = 'procesado';
+    // Marcar carrito como procesado y vaciar items
+    carrito.estado = 'activo';
+    carrito.items = [];
+    carrito.total = 0;
     await carrito.save();
 
     res.json({

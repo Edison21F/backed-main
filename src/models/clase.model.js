@@ -13,7 +13,7 @@ const claseSchema = new mongoose.Schema({
   },
   docenteId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Docente',
+    ref: 'User',
     required: true
   },
   titulo: {

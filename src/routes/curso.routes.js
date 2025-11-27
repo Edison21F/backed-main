@@ -17,6 +17,8 @@ const router = Router();
 
 // Rutas públicas para ver cursos activos
 router.get('/activos', getCursosActivos);
+// Detalle público
+router.get('/:id', getCursoById);
 
 // Todas las demás rutas requieren autenticación
 router.use(authRequired);
@@ -25,7 +27,6 @@ router.use(authRequired);
 
 router.post('/', uploadImagenCurso, validateSchema(createCursoSchema), createCurso);
 router.get('/', getCursos);
-router.get('/:id', getCursoById);
 router.put('/:id', uploadImagenCurso, validateSchema(updateCursoSchema), updateCurso);
 router.delete('/:id', deleteCurso);
 

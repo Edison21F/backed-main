@@ -99,7 +99,7 @@ app.use(hpp());
 // Rate limiting
 const limiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutos
-    max: 100, // máximo 100 requests por ventana
+    max: 1000, // máximo 100 requests por ventana
     message: { error: 'Demasiadas peticiones, intenta más tarde.' },
     standardHeaders: true,
     legacyHeaders: false,
@@ -114,7 +114,7 @@ const limiter = rateLimit({
 // Aplicar rate limiting a rutas de autenticación
 app.use('/api/login', rateLimit({
     windowMs: 15 * 60 * 1000,
-    max: 10, // solo 5 intentos de login cada 15 minutos
+    max: 25, // solo 5 intentos de login cada 15 minutos
     message: { error: 'Demasiados intentos de inicio de sesión.' }
 }));
 

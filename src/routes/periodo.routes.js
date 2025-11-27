@@ -13,6 +13,10 @@ import { createPeriodoSchema, updatePeriodoSchema } from "../schemas/periodo.sch
 const router = Router();
 
 // Todas las rutas requieren autenticaciÃ³n
+// Lista pública de periodos (para detalle de curso)
+router.get('/', getPeriodos);
+
+// Rutas protegidas
 router.use(authRequired);
 
 // CRUD completo

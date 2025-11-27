@@ -1,19 +1,13 @@
 import Matricula from '../models/matricula.model.js';
 import Periodo from '../models/periodo.model.js';
+import User from '../models/user.model.js';
+import { matricularEstudiante } from '../services/matricula.service.js';
 
 // Crear matricula
 export const createMatricula = async (req, res) => {
   try {
-    const matricula = new Matricula(req.body);
-    const savedMatricula = await matricula.save();
-
-    // Actualizar cupos del periodo
-    await Periodo.findByIdAndUpdate(
-      req.body.periodoId,
-      { $inc: { cuposOcupados: 1 } }
-    );
-
-    res.status(201).json(savedMatricula);
+    const matricula = await matricularEstudiante(req.body);
+    res.status(201).json(matricula);
   } catch (error) {
     console.error('Error creating enrollment:', error);
     res.status(500).json({ message: error.message });
@@ -31,9 +25,13 @@ export const getMatriculas = async (req, res) => {
     if (estado) filter.estado = estado;
 
     const matriculas = await Matricula.find(filter)
-      .populate('estudianteId', 'usuarioId')
-      .populate('periodoId', 'nombre codigo')
-      .populate('cursoId', 'nombre codigo')
+      .populate({
+        path: 'estudianteId',
+        select: 'usuarioId',
+        populate: { path: 'usuarioId', select: 'nombres apellidos email' }
+      })
+      .populate('periodoId', 'nombre codigo fechaInicio fechaFin')
+      .populate('cursoId', 'nombre codigo precio')
       .sort({ fechaMatricula: -1 });
     res.json(matriculas);
   } catch (error) {
@@ -67,9 +65,9 @@ export const updateMatricula = async (req, res) => {
       req.body,
       { new: true, runValidators: true }
     )
-    .populate('estudianteId', 'usuarioId')
-    .populate('periodoId')
-    .populate('cursoId');
+      .populate('estudianteId', 'usuarioId')
+      .populate('periodoId')
+      .populate('cursoId');
 
     if (!updatedMatricula) {
       return res.status(404).json({ message: 'Enrollment not found' });
@@ -108,10 +106,12 @@ export const getMatriculasByEstudiante = async (req, res) => {
   try {
     //funcion traer id del usuario logueado
     const userId = req.user.id;
+    console.log('Fetching enrollments for user:', userId);
     const matriculas = await Matricula.find({ estudianteId: userId })
-      .populate('periodoId', 'nombre codigo fechaInicio fechaFin')
+      .populate('periodoId', 'nombre codigo fechaInicio fechaFin horario')
       .populate('cursoId', 'nombre codigo precio')
       .sort({ fechaMatricula: -1 });
+    console.log('Found enrollments:', matriculas);
     res.json(matriculas);
   } catch (error) {
     console.error('Error getting student enrollments:', error);
@@ -162,34 +162,10 @@ export const adminMatricularEstudiante = async (req, res) => {
       return res.status(403).json({ message: 'Access denied. Admin required.' });
     }
 
-    // Verificar que el estudiante existe y es estudiante
-    const estudiante = await User.findById(estudianteId);
-    if (!estudiante || estudiante.rol !== 'estudiante') {
-      return res.status(404).json({ message: 'Student not found' });
-    }
-
-    // Verificar que el periodo existe
+    // Verificar que el periodo existe para obtener el precio
     const periodo = await Periodo.findById(periodoId).populate('cursoId');
     if (!periodo) {
       return res.status(404).json({ message: 'Period not found' });
-    }
-
-    if (periodo.estado !== 'en_curso') {
-      return res.status(400).json({ message: 'Period is not available for enrollment' });
-    }
-
-    if (periodo.cuposDisponibles <= 0) {
-      return res.status(400).json({ message: 'No available spots for this period' });
-    }
-
-    // Verificar que no esté ya matriculado
-    const existingMatricula = await Matricula.findOne({
-      estudianteId: estudianteId,
-      periodoId: periodoId
-    });
-
-    if (existingMatricula) {
-      return res.status(400).json({ message: 'Student is already enrolled in this period' });
     }
 
     // Calcular precios con descuento
@@ -197,34 +173,24 @@ export const adminMatricularEstudiante = async (req, res) => {
     const descuentoAplicado = descuento || 0;
     const precioFinal = precioOriginal * (1 - descuentoAplicado / 100);
 
-    // Crear matricula
-    const matricula = new Matricula({
-      estudianteId: estudianteId,
-      periodoId: periodoId,
+    const matricula = await matricularEstudiante({
+      estudianteId,
+      periodoId,
       cursoId: periodo.cursoId._id,
       metodoPago: metodoPago || 'efectivo',
       montoPagado: precioFinal,
-      montoPendiente: 0,
       descuento: descuentoAplicado,
       observaciones: observaciones || 'Matriculado por administrador'
     });
 
-    const savedMatricula = await matricula.save();
-
-    // Actualizar cupos del periodo
-    await Periodo.findByIdAndUpdate(
-      periodoId,
-      { $inc: { cuposOcupados: 1, cuposDisponibles: -1 } }
-    );
-
     // Poblar datos para respuesta
-    await savedMatricula.populate('estudianteId', 'nombres apellidos email');
-    await savedMatricula.populate('periodoId', 'nombre codigo');
-    await savedMatricula.populate('cursoId', 'nombre codigo');
+    await matricula.populate('estudianteId', 'nombres apellidos email');
+    await matricula.populate('periodoId', 'nombre codigo');
+    await matricula.populate('cursoId', 'nombre codigo');
 
     res.status(201).json({
       message: 'Student enrolled successfully by admin',
-      matricula: savedMatricula
+      matricula
     });
   } catch (error) {
     console.error('Error enrolling student by admin:', error);
